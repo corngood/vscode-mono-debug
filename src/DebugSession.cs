@@ -336,22 +336,19 @@ namespace VSCodeDebug
 
         public DebugSession() { }
 
-        public void SendResponse(Response response, dynamic body = null)
+        public void SetResponse(Response response, dynamic body = null)
         {
             if (body != null)
             {
                 response.SetBody(body);
             }
-
-            SendMessage(response);
         }
 
-        public void SendErrorResponse(Response response, int id, string format, dynamic arguments = null, bool user = true, bool telemetry = false)
+        public void SetErrorResponse(Response response, int id, string format, dynamic arguments = null, bool user = true, bool telemetry = false)
         {
             var msg = new Message(id, format, arguments, user, telemetry);
             var message = Utilities.ExpandVariables(msg.format, msg.variables);
             response.SetErrorBody(message, new ErrorResponseBody(msg));
-            SendMessage(response);
         }
 
         protected override void DispatchRequest(string command, dynamic args, Response response)
@@ -383,7 +380,7 @@ namespace VSCodeDebug
                                     _clientPathsAreURI = false;
                                     break;
                                 default:
-                                    SendErrorResponse(response, 1015, "initialize: bad value '{_format}' for pathFormat", new { _format = pathFormat });
+                                    SetErrorResponse(response, 1015, "initialize: bad value '{_format}' for pathFormat", new { _format = pathFormat });
                                     return;
                             }
                         }
@@ -464,13 +461,13 @@ namespace VSCodeDebug
                         break;
 
                     default:
-                        SendErrorResponse(response, 1014, "unrecognized request: {_request}", new { _request = command });
+                        SetErrorResponse(response, 1014, "unrecognized request: {_request}", new { _request = command });
                         break;
                 }
             }
             catch (Exception e)
             {
-                SendErrorResponse(response, 1104, "error while processing request '{_request}' (exception: {_exception})", new { _request = command, _exception = e.Message });
+                SetErrorResponse(response, 1104, "error while processing request '{_request}' (exception: {_exception})", new { _request = command, _exception = e.Message });
             }
 
             if (command == "disconnect")
